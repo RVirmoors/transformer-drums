@@ -4,7 +4,7 @@ Instructions apply to Windows but should be similar for Linux.
 
 https://www.python.org/downloads/release/python-3913/
 
-2. Create new folder, open in VS Code
+2. Open this folder in an editor like VS Code.
 
 3. Run in terminal:
 
