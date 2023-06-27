@@ -12,9 +12,9 @@ https://www.python.org/downloads/release/python-3913/
 python -m venv venv
 ```
 
-4. Create a 'libs' folder in venv/Scripts
+4. Create a 'libs' folder in `venv/Scripts`
 
-5. Copy python39.lib from your Python39/libs folder to your venv/Scripts/libs. Then keep executing in terminal:
+5. Copy `python39.lib` from your `Python39/libs` folder to your `venv/Scripts/libs`. Then keep executing in terminal:
 
 ```
 venv/Scripts/activate.bat
