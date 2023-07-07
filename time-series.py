@@ -28,12 +28,12 @@ class TransformerModel(nn.Module):
         output = self.fc(output)
         return output
 
-model = TransformerModel(1, 1, d_model=8, nhead=2)
+model = TransformerModel(1, 1, d_model=8, nhead=2).to(device)
     
 # a toy univariate time series dataset
 
 data = torch.Tensor([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]).unsqueeze(dim=-1).to(device)
-# print(data)
+# print(1 - data)
 input_seq = data[:-1] 
 output_seq = data[1:]
 
@@ -43,10 +43,10 @@ output_seq = data[1:]
 # training code
 
 def train():
-    model.to(device).train()
+    model.train()
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
     print("Training...")
-    for epoch in range(20000):
+    for epoch in range(6000):
         optimizer.zero_grad()
         out = model(data, data)
         loss = F.mse_loss(out, data)
@@ -58,3 +58,4 @@ def train():
 train()
 
 print(model(data, data))
+print(model(1-data, 1-data))
