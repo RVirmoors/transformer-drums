@@ -16,15 +16,15 @@ print(device)
 class TransformerModel(nn.Module):
     def __init__(self, input_dim, output_dim, d_model, nhead):
         super(TransformerModel, self).__init__()
-        #self.pos_enc = nn.Embedding(10, d_model) 
-        self.pos_enc = nn.Linear(input_dim, d_model)
+        self.pos_enc = nn.Embedding(10, d_model) 
+        #self.pos_enc = nn.Linear(input_dim, d_model)
         self.transformer = nn.Transformer(d_model=d_model, nhead=nhead)
         self.fc = nn.Linear(d_model, output_dim)
 
     def forward(self, src, tgt):
-        #pos = torch.arange(0, len(src), dtype=torch.long).to(device)#.unsqueeze(0)
-        src = src + self.pos_enc(src)
-        tgt = tgt + self.pos_enc(tgt)
+        pos = torch.arange(0, len(src), dtype=torch.long).to(device)#.unsqueeze(0)
+        src = src + self.pos_enc(pos)
+        tgt = tgt + self.pos_enc(pos)
         output = self.transformer(src, tgt)
         output = self.fc(output)
         return output
