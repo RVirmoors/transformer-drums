@@ -46,7 +46,7 @@ def train():
     model.train()
     optimizer = torch.optim.Adam(model.parameters(), lr=5e-4)
     print("Training...")
-    for epoch in range(2000):
+    for epoch in range(12000):
         optimizer.zero_grad()
         out = model(data, data)
         loss = F.mse_loss(out, data)
