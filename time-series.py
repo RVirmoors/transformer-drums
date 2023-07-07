@@ -16,14 +16,15 @@ print(device)
 class TransformerModel(nn.Module):
     def __init__(self, input_dim, output_dim, d_model, nhead):
         super(TransformerModel, self).__init__()
+        #self.pos_enc = nn.Embedding(10, d_model) 
         self.pos_enc = nn.Linear(input_dim, d_model)
         self.transformer = nn.Transformer(d_model=d_model, nhead=nhead)
         self.fc = nn.Linear(d_model, output_dim)
-# define a Transformer in PyTorch and use it to predict a single value in a given sequence
 
     def forward(self, src, tgt):
-        src = self.pos_enc(src)
-        tgt = self.pos_enc(tgt)
+        #pos = torch.arange(0, len(src), dtype=torch.long).to(device)#.unsqueeze(0)
+        src = src + self.pos_enc(src)
+        tgt = tgt + self.pos_enc(tgt)
         output = self.transformer(src, tgt)
         output = self.fc(output)
         return output
@@ -33,7 +34,6 @@ model = TransformerModel(1, 1, d_model=8, nhead=2).to(device)
 # a toy univariate time series dataset
 
 data = torch.Tensor([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]).unsqueeze(dim=-1).to(device)
-# print(1 - data)
 input_seq = data[:-1] 
 output_seq = data[1:]
 
@@ -44,9 +44,9 @@ output_seq = data[1:]
 
 def train():
     model.train()
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
+    optimizer = torch.optim.Adam(model.parameters(), lr=5e-4)
     print("Training...")
-    for epoch in range(6000):
+    for epoch in range(2000):
         optimizer.zero_grad()
         out = model(data, data)
         loss = F.mse_loss(out, data)
