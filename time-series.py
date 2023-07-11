@@ -68,7 +68,7 @@ def train():
     model.train()
     optimizer = torch.optim.Adam(model.parameters(), lr=5e-4)
     print("Training...")
-    for epoch in range(5000):
+    for epoch in range(8000):
         for i in range(len(input_seq)):
             optimizer.zero_grad()
             out = model(data[i], input_seq[i])
@@ -81,4 +81,5 @@ def train():
 train()
 
 print("Last value is the usable prediction:", model(data[0], input_seq[0]))
-print(model(data[5], input_seq[5]))
+print(model(data[3], input_seq[3]))
+print(model(data[6], input_seq[6]))
