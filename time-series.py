@@ -29,6 +29,7 @@ class TransformerModel(nn.Module):
     def forward(self, src, tgt):            
         pos_src = torch.arange(0, len(src), dtype=torch.long).to(device)
         pos_tgt = torch.round((tgt - 0.1)*10).long().squeeze()
+        tgt = torch.randn_like(tgt)
         src = self.embedding(src)
         tgt = self.embedding(tgt)
         if pos_enc == "index":
@@ -67,7 +68,7 @@ def train():
     model.train()
     optimizer = torch.optim.Adam(model.parameters(), lr=5e-4)
     print("Training...")
-    for epoch in range(2000):
+    for epoch in range(5000):
         for i in range(len(input_seq)):
             optimizer.zero_grad()
             out = model(data[i], input_seq[i])
