@@ -44,7 +44,7 @@ class TransformerModel(nn.Module):
     
 model = TransformerModel(1, 1, d_model=8, nhead=2).to(device)
     
-# a toy univariate time series dataset
+# a toy univariate sequence dataset
 
 data = torch.Tensor([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]).unsqueeze(dim=-1).to(device)
 data = torch.stack([data, data, data, data, data, data, data]) # 7 batches
