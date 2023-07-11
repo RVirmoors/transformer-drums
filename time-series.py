@@ -8,10 +8,6 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
-import sys
-sys.path.append('transformer')
-from transformer.tst import Transformer
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(device)
 
@@ -33,7 +29,7 @@ class TransformerModel(nn.Module):
     def forward(self, src, tgt):            
         pos_src = torch.arange(0, len(src), dtype=torch.long).to(device)
         pos_tgt = torch.round((tgt - 0.1)*10).long().squeeze()
-        # tgt = torch.randn_like(tgt)
+        tgt = torch.randn_like(tgt)
         src = self.embedding(src)
         tgt = self.embedding(tgt)
         if pos_enc == "index":
@@ -46,8 +42,7 @@ class TransformerModel(nn.Module):
         output = self.fc(output)
         return output
     
-# model = TransformerModel(1, 1, d_model=8, nhead=2).to(device)
-model = Transformer(1, 8, 1, 4, 4, 4, 2).to(device)
+model = TransformerModel(1, 1, d_model=8, nhead=2).to(device)
     
 # a toy univariate time series dataset
 
@@ -73,10 +68,10 @@ def train():
     model.train()
     optimizer = torch.optim.Adam(model.parameters(), lr=5e-4)
     print("Training...")
-    for epoch in range(2000):
+    for epoch in range(5000):
         for i in range(len(input_seq)):
             optimizer.zero_grad()
-            out = model(input_seq[i])
+            out = model(data[i], input_seq[i])
             loss = F.mse_loss(out[-1], output[i][0])
             loss.backward()
             optimizer.step()
@@ -85,5 +80,5 @@ def train():
 
 train()
 
-print("Last value is the usable prediction:", model(input_seq[0]))
-print(model(input_seq[5]))
+print("Last value is the usable prediction:", model(data[0], input_seq[0]))
+print(model(data[5], input_seq[5]))
