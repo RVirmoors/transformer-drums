@@ -13,36 +13,31 @@ print(device)
 
 # define a Transformer in PyTorch and use it to predict a single value in a given sequence
 
-class TransformerModelIndexPos(nn.Module):
+pos_enc = "index" # "index" or "linear"
+
+class TransformerModel(nn.Module):
     def __init__(self, input_dim, output_dim, d_model, nhead):
-        super(TransformerModelIndexPos, self).__init__()
-        self.pos_enc = nn.Embedding(10, d_model)
+        super(TransformerModel, self).__init__()
+        if pos_enc == "index":
+            self.pos_enc = nn.Embedding(10, d_model)
+        else:
+            self.pos_enc = nn.Linear(input_dim, d_model)
         self.transformer = nn.Transformer(d_model=d_model, nhead=nhead)
         self.fc = nn.Linear(d_model, output_dim)
 
     def forward(self, src, tgt):
-        pos = torch.arange(0, len(src), dtype=torch.long).to(device)#.unsqueeze(0)
-        src = src + self.pos_enc(pos)
-        tgt = tgt + self.pos_enc(pos)
+        if pos_enc == "index":
+            pos = torch.arange(0, len(src), dtype=torch.long).to(device)#.unsqueeze(0)
+            src = src + self.pos_enc(pos)
+            tgt = tgt + self.pos_enc(pos)
+        else:
+            src = src + self.pos_enc(src)
+            tgt = tgt + self.pos_enc(tgt)
         output = self.transformer(src, tgt)
         output = self.fc(output)
         return output
     
-class TransformerModelLinearPos(nn.Module):
-    def __init__(self, input_dim, output_dim, d_model, nhead):
-        super(TransformerModelLinearPos, self).__init__()
-        self.pos_enc = nn.Linear(input_dim, d_model)
-        self.transformer = nn.Transformer(d_model=d_model, nhead=nhead)
-        self.fc = nn.Linear(d_model, output_dim)
-
-    def forward(self, src, tgt):
-        src = src + self.pos_enc(src)
-        tgt = tgt + self.pos_enc(tgt)
-        output = self.transformer(src, tgt)
-        output = self.fc(output)
-        return output
-
-model = TransformerModelIndexPos(1, 1, d_model=8, nhead=2).to(device)
+model = TransformerModel(1, 1, d_model=8, nhead=2).to(device)
     
 # a toy univariate time series dataset
 
