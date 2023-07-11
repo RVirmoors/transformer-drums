@@ -13,4 +13,10 @@ Playing Drums with Transformers - a series of experiments
 
 Basic experiment: can a Transformer "predict" a value if its Encoder sees the whole sequence?
 
+- run `python sequence.py`
+
+### 1.2. Simple time series
+
+Standard usage model: encoder sees the history & whole time axis, decoder sees the current step & predicts the next.
+
 - run `python time-series.py`
