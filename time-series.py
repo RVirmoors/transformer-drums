@@ -99,6 +99,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=4e-4)
 early_stopper = EarlyStopper(patience=10, min_delta=0.3)
 
 def train():
+    global checkpoint
     model.train()
     min_loss = np.inf
     print("Training...")
@@ -137,6 +138,7 @@ if load:
 
 if train:
     train()
+    model.load_state_dict(checkpoint['model'])
 
 print(model(data[0], input_seq[0]), "should be 0.5  0.2")
 print(model(data[3], input_seq[3]), "should be 0.5  0.5")
