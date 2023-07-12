@@ -5,7 +5,7 @@
 
 pos_enc = "regular" # "regular" or "embedding" or "linLayer"
 train = True
-load_model = 'ckpt.pt'
+load_model = 'ckpt_nosig'
 
 import torch
 import torch.nn as nn
@@ -78,7 +78,7 @@ class TransformerModel(nn.Module):
         output = self.transformer(src, tgt, src_mask=src_mask)
         # print(output)
         output = self.fc(output)
-        return self.sigmoid(output)
+        return output # self.sigmoid(output)
     
 model = TransformerModel(2, 2, d_model=8, nhead=2).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=5e-4)
@@ -88,7 +88,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=5e-4)
 def train():
     model.train()
     print("Training...")
-    for epoch in range(80):
+    for epoch in range(800):
         for i in range(len(input_seq)):
             optimizer.zero_grad()
             out = model(data[i], input_seq[i])
@@ -113,13 +113,14 @@ if load_model:
 if train:
     train()
 
-print(model(data[0], input_seq[0]))
-print(model(data[3], input_seq[3]))
-print(model(data[6], input_seq[6]))
+print(model(data[0], input_seq[0]), "should be 0.5  0.2")
+print(model(data[3], input_seq[3]), "should be 0.5  0.5")
+print(model(data[6], input_seq[6]), "should be 0    0.7")
+print(model(data[9], input_seq[9]), "should be 0.75 1.0")
 
 
 checkpoint = {
             'model': model.state_dict(),
             'optimizer': optimizer.state_dict(),
             }
-torch.save(checkpoint, 'ckpt.pt')
+torch.save(checkpoint, load_model)
