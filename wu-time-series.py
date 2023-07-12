@@ -6,15 +6,13 @@
 
 # RESULTS w/ es(10, 0.3)
 # =======================
-# regular, nosig, 4e-5, 9k epochs: 0.0007
-# regular, sig, 4e-5, 5000+ epochs: 0.006
-# linLayer, nosig, 4e-5, 2200 ep: 0.036
-# linLayer, sig, 4e-5, 5000 ep: 0.008 
+# regular, 4e-5, 2700 epochs: 0.02
+# linLayer, 4e-5, 2200 ep: 0.036
 
 
 pos_enc = "regular" # "regular" or "linLayer"
 training = False
-load_model = 'reg_nosig.pt'
+load_model = 'reg_wu.pt'
 
 import torch
 import torch.nn as nn
@@ -41,13 +39,13 @@ data = torch.Tensor([[0., 0.1],
                     [0.5, 0.9],
                     [0.75, 1.0]]).to(device)
 
-data = torch.stack([data, data, data, data, data, data, data, data, data]) # 9 batches -> ENCODER
+data = torch.stack([data, data, data, data, data, data, data, data]) # 8 batches -> ENCODER
 
-input_seq = torch.stack([data[i][i] for i in range(len(data[0])-1)]).unsqueeze(dim=1) # 9 batches, 1 timestep -> DECODER
+input_seq = torch.stack([data[i][i:i+2] for i in range(len(data[0])-2)]) # 8 batches, 2 timesteps -> DECODER
 # print(input_seq)
 # exit()
 
-output = torch.stack([data[i][i+1] for i in range(len(data[0])-1)]).unsqueeze(dim=1)
+output = torch.stack([data[i][i+1:i+3] for i in range(len(data[0])-2)])
 # print(output)
 # exit()
 
@@ -138,10 +136,9 @@ if training:
     train()
     model.load_state_dict(checkpoint['model'])
 
-print(model(data[0], input_seq[0]), "should be 0.5  0.2")
-print(model(data[3], input_seq[3]), "should be 0.5  0.5")
-print(model(data[6], input_seq[6]), "should be 0.25 0.8")
-print(model(data[8], input_seq[8]), "should be 0.75 1.0")
+print(model(data[0], input_seq[0]), "should be 0.  0.3")
+print(model(data[3], input_seq[3]), "should be 0.75  0.6")
+print(model(data[6], input_seq[6]), "should be 0.5 0.9")
 
 print("OUT OF SAMPLE TESTS:")
 print("0.0 0.4 ->", model(data[-1], torch.Tensor([[0., 0.4]]).to(device)))
