@@ -3,9 +3,15 @@
 # https://github.com/oliverguhr/transformer-time-series-prediction
 # https://github.com/AIStream-Peelout/flow-forecast
 
+
+# RESULTS w/ es(10, 0.3)
+# ======================
+# regular, nosig, 4e-4, __ epochs: 
+
 pos_enc = "regular" # "regular" or "embedding" or "linLayer"
+sigmoid = False
 train = True
-load_model = 'ckpt_nosig'
+load_model = 'ckpt_nosig.pt'
 
 import torch
 import torch.nn as nn
@@ -13,6 +19,8 @@ from torch.nn import functional as F
 import math
 import os
 import numpy as np
+
+from utils import EarlyStopper
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(device)
@@ -78,17 +86,24 @@ class TransformerModel(nn.Module):
         output = self.transformer(src, tgt, src_mask=src_mask)
         # print(output)
         output = self.fc(output)
-        return output # self.sigmoid(output)
+        if sigmoid:
+            return self.sigmoid(output)
+        else:
+            return output
     
 model = TransformerModel(2, 2, d_model=8, nhead=2).to(device)
-optimizer = torch.optim.Adam(model.parameters(), lr=5e-4)
+optimizer = torch.optim.Adam(model.parameters(), lr=4e-4)
     
 # training code
 
+early_stopper = EarlyStopper(patience=10, min_delta=0.3)
+
 def train():
     model.train()
+    min_loss = np.inf
     print("Training...")
-    for epoch in range(800):
+    for epoch in range(5000):
+        total_loss = 0
         for i in range(len(input_seq)):
             optimizer.zero_grad()
             out = model(data[i], input_seq[i])
@@ -96,31 +111,37 @@ def train():
             loss = F.mse_loss(out, output[i])
             loss.backward()
             optimizer.step()
+            total_loss += loss.detach().item()
+        if total_loss < min_loss:
+            min_loss = total_loss
+            print("New min loss:", min_loss)
+            checkpoint = {
+                'model': model.state_dict(),
+                'optimizer': optimizer.state_dict(),
+                }
+        if early_stopper.early_stop(total_loss):            
+            break
         if epoch % 10 == 0:
-            print("Epoch", epoch, " - " , loss.item())
+            print("Epoch", epoch, " - " , total_loss)
 
+load = True
 if load_model and not os.path.isfile(load_model):
     print("No model found at", load_model, "-- starting from scratch...")
-    load_model = None
+    load = False
 
-if load_model:
+if load:
     print("Resuming training from", load_model, "...")
     checkpoint = torch.load(load_model, map_location=device)
     model.load_state_dict(checkpoint['model'])
     optimizer.load_state_dict(checkpoint['optimizer'])
 
-    
 if train:
     train()
 
 print(model(data[0], input_seq[0]), "should be 0.5  0.2")
 print(model(data[3], input_seq[3]), "should be 0.5  0.5")
-print(model(data[6], input_seq[6]), "should be 0    0.7")
-print(model(data[9], input_seq[9]), "should be 0.75 1.0")
+print(model(data[6], input_seq[6]), "should be 0.25 0.8")
+print(model(data[8], input_seq[8]), "should be 0.75 1.0")
 
-
-checkpoint = {
-            'model': model.state_dict(),
-            'optimizer': optimizer.state_dict(),
-            }
+print("Writing", load_model)
 torch.save(checkpoint, load_model)
