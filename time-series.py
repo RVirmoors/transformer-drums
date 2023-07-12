@@ -6,12 +6,14 @@
 
 # RESULTS w/ es(10, 0.3)
 # ======================
-# regular, nosig, 4e-4, __ epochs: 
+# regular, nosig, 4e-4, 360 epochs: 0.123
+# regular, sig, 4e-4, 320 epochs: 0.447
+# 
 
-pos_enc = "regular" # "regular" or "embedding" or "linLayer"
-sigmoid = False
+pos_enc = "linLayer" # "regular" or "linLayer"
+sigmoid = True
 train = True
-load_model = 'ckpt_nosig.pt'
+load_model = 'reg_lin.pt'
 
 import torch
 import torch.nn as nn
@@ -55,17 +57,14 @@ class TransformerModel(nn.Module):
     def __init__(self, input_dim, output_dim, d_model, nhead):
         super(TransformerModel, self).__init__()
         self.d_model = d_model
-        self.pos_embed = nn.Embedding(input_dim, d_model)
-        self.pos_linLayer = nn.Linear(1, d_model)
+        self.pos_linLayer = nn.Linear(input_dim, d_model)
         self.embedding = nn.Linear(input_dim, d_model)
         self.transformer = nn.Transformer(d_model=d_model, nhead=nhead)
         self.fc = nn.Linear(d_model, output_dim)
         self.sigmoid = torch.nn.Sigmoid()
 
     def generatePE(self, x: torch.Tensor):
-        if pos_enc == "embedding":
-            return self.pos_embed(x)
-        elif pos_enc == "linLayer":
+        if pos_enc == "linLayer":
             return self.pos_linLayer(x)
         elif pos_enc == "regular":
             PE = torch.zeros((len(x), self.d_model))
