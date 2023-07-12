@@ -5,15 +5,17 @@
 
 
 # RESULTS w/ es(10, 0.3)
-# ======================
+# =======================
 # regular, nosig, 4e-4, 360 epochs: 0.123
 # regular, sig, 4e-4, 320 epochs: 0.447
-# 
+# linLayer, nosig, 4e-5, 2200 ep: 0.036
+# linLayer, sig, 4e-5, 5000 ep: 0.008 
+
 
 pos_enc = "linLayer" # "regular" or "linLayer"
-sigmoid = True
+sigmoid = False
 train = True
-load_model = 'reg_lin.pt'
+load_model = 'lin_nosig.pt'
 
 import torch
 import torch.nn as nn
@@ -91,7 +93,7 @@ class TransformerModel(nn.Module):
             return output
     
 model = TransformerModel(2, 2, d_model=8, nhead=2).to(device)
-optimizer = torch.optim.Adam(model.parameters(), lr=4e-4)
+optimizer = torch.optim.Adam(model.parameters(), lr=4e-5)
     
 # training code
 
@@ -144,5 +146,11 @@ print(model(data[3], input_seq[3]), "should be 0.5  0.5")
 print(model(data[6], input_seq[6]), "should be 0.25 0.8")
 print(model(data[8], input_seq[8]), "should be 0.75 1.0")
 
-print("Writing", load_model)
-torch.save(checkpoint, load_model)
+print("OUT OF SAMPLE TESTS:")
+print("0.0 0.4 ->", model(data[-1], torch.Tensor([[0., 0.4]]).to(device)))
+print("0.25 0.6 ->", model(data[-1], torch.Tensor([[0.26, 0.6]]).to(device)))
+print("0.75 0.1 ->", model(data[-1], torch.Tensor([[0.75, 0.1]]).to(device)))
+
+if train:
+    print("Writing", load_model)
+    torch.save(checkpoint, load_model)
