@@ -11,7 +11,7 @@
 
 
 pos_enc = "regular" # "regular" or "linLayer"
-training = False
+training = True
 load_model = 'reg_wu.pt'
 
 import torch
@@ -56,18 +56,18 @@ class TransformerModel(nn.Module):
     def __init__(self, input_dim, output_dim, d_model, nhead):
         super(TransformerModel, self).__init__()
         self.d_model = d_model
-        self.pos_linLayer = nn.Linear(input_dim, d_model)
+        self.pos_linLayer = nn.Linear(1, d_model)
         self.embedding = nn.Linear(input_dim, d_model)
         self.transformer = nn.Transformer(d_model=d_model, nhead=nhead)
         self.fc = nn.Linear(d_model, output_dim)
         # self.sigmoid = torch.nn.Sigmoid()
 
     def generatePE(self, x: torch.Tensor):
+        pos = x[:,0]
         if pos_enc == "linLayer":
-            return self.pos_linLayer(x)
+            return self.pos_linLayer(pos)
         elif pos_enc == "regular":
             PE = torch.zeros((len(x), self.d_model))
-            pos = x[:,0]
             PE = torch.sin(pos * 2 * np.pi).unsqueeze(-1)
             PE = PE.repeat((1, self.d_model))
             # print(PE)
