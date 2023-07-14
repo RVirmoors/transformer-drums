@@ -20,3 +20,11 @@ Basic experiment: can a Transformer "predict" a value if its Encoder sees the wh
 Standard usage model: encoder sees the history & whole time axis, decoder sees the current step & predicts the next.
 
 - run `python time-series.py`
+
+## 2. Drum sequences
+
+### 2.1 Drums prediction
+
+### 2.2 Drums generation
+
+## 3. C++ implementation with LibTorch
