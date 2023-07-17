@@ -28,3 +28,20 @@ Standard usage model: encoder sees the history & whole time axis, decoder sees t
 ### 2.2 Drums generation
 
 ## 3. C++ implementation with LibTorch
+
+Download the Release version of LibTorch from the [PyTorch website](https://pytorch.org/get-started/locally/) and extract it somewhere, making note of the absolute path. See also the [official](https://pytorch.org/tutorials/advanced/cpp_frontend.html) [guides](https://pytorch.org/cppdocs/installing.html).
+
+If you want to use CUDA, make sure you get the right version for what you have installed (run `nvcc --version` to check).
+
+Edit `CMakeLists.txt` and replace your absolute path to your libtorch download next to `CMAKE_PREFIX_PATH` (instead of my `"E:/GitHub/libtorch"`)
+
+Then run:
+
+```
+mkdir build
+cd build
+cmake ..
+cmake --build . --config Release
+```
+
+Then you can run `drums.exe` from the `build/Release` folder, BUT ONLY after you copy (on Windows) all the .dll files from `libtorch/lib` next to `drums.exe`.
