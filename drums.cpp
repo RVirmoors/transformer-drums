@@ -25,5 +25,5 @@ int main() {
 
     std::cout << net << std::endl;
 
-    std::cout << net.forward(torch::ones({2, 2}).to(device)) << std::endl;
+    std::cout << net.forward(torch::ones({4, 2}).to(device)) << std::endl;
 }
