@@ -22,7 +22,8 @@ int main() {
 
     Net net(2, 3);
     net.to(device);
-    for (const auto& p : net.parameters()) {
-        std::cout << p << std::endl;
-    }
+
+    std::cout << net << std::endl;
+
+    std::cout << net.forward(torch::ones({2, 2}).to(device)) << std::endl;
 }
