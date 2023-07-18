@@ -1,8 +1,6 @@
 #include <iostream>
 #include <torch/torch.h>
 
-// next: pre-compiled headers
-
 int main() {
     torch::Device device = torch::kCPU;
     if (torch::cuda::is_available()) {
