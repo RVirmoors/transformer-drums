@@ -3,6 +3,8 @@
 
 using namespace torch;
 
+// TODO normalize all features
+
 struct TransformerModelImpl : nn::Module {
     TransformerModelImpl(int input_dim, int output_dim, int d_model, int nhead, torch::Device device) :
     device(device),
@@ -11,6 +13,10 @@ struct TransformerModelImpl : nn::Module {
     transformer(nn::Transformer(nn::TransformerOptions(d_model, nhead))),
     fc(nn::Linear(d_model, output_dim))
     {   
+        register_module("pos_linLayer", pos_linLayer);
+        register_module("embedding", embedding);
+        register_module("transformer", transformer);
+        register_module("fc", fc);
         pos_linLayer->to(device);
         embedding->to(device);
         transformer->to(device);
@@ -30,6 +36,7 @@ struct TransformerModelImpl : nn::Module {
         src = src.unsqueeze(1); // add batch dimension, needed for transformer
         tgt = tgt.unsqueeze(1); // expects (T, B, C)
         torch::Tensor output = transformer(src, tgt, src_mask);
+        output = output.squeeze(1); // remove batch dimension
         output = fc(output);
         return output;
     }
@@ -86,6 +93,41 @@ int main() {
     // std::cout << "input_seq:" << std::endl << input_seq << std::endl;
     // std::cout << "output:" << std::endl << output << std::endl;
     // std::cout << "data:" << std::endl << data << std::endl;
+
+    torch::optim::Adam optimizer(model->parameters(), torch::optim::AdamOptions(4e-5));
+    double min_loss = std::numeric_limits<double>::infinity();
+
+    std::cout << "Training..." << std::endl;
+    model->train();
+    for (int epoch = 0; epoch < 500; epoch++) {
+        double total_loss = 0.0;
+        for (size_t i = 0; i < input_seq.size(0); i++) {
+            optimizer.zero_grad();
+
+            // Assuming src and tgt are torch::Tensor inputs
+            torch::Tensor src = data[i];
+            torch::Tensor tgt = input_seq[i];
+
+            torch::Tensor out = model->forward(src, tgt);
+            torch::Tensor loss = torch::mse_loss(out, output[i]);
+
+            loss.backward();
+            optimizer.step();
+
+            total_loss += loss.item<double>();
+        }
+
+        if (total_loss < min_loss) {
+            min_loss = total_loss;
+            std::cout << "New min loss: " << min_loss << std::endl;
+            // Save the model checkpoint.
+            //torch::save({{"model", model}, {"optimizer", optimizer}}, load_model);
+        }
+
+        if (epoch % 10 == 0) {
+            std::cout << "Epoch " << epoch << " - " << total_loss << std::endl;
+        }
+    }
 
     std::cout << model->forward(data[0], input_seq[0]) << std::endl;
 }
