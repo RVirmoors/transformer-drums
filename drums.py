@@ -50,7 +50,6 @@ class TransformerModel(nn.Module):
         self.embedding = nn.Linear(input_dim, d_model)
         self.transformer = nn.Transformer(d_model=d_model, nhead=nhead)
         self.fc = nn.Linear(d_model, output_dim)
-        # self.sigmoid = torch.nn.Sigmoid()
 
     def generatePE(self, x: torch.Tensor):
         if pos_enc == "linLayer":

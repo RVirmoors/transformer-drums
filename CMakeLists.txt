@@ -12,6 +12,5 @@ set_property(TARGET drums PROPERTY CXX_STANDARD 14)
 target_precompile_headers(${PROJECT_NAME} 
 	PRIVATE 
 	<torch/torch.h>
-	<string>
-	<thread>
+	<iostream>
 	<vector>)
